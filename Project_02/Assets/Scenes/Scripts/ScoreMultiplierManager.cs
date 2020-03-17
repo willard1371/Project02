@@ -1,0 +1,54 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class ScoreMultiplierManager : MonoBehaviour
+{
+    private float timer;
+    private float maxTimer;
+
+    public GameObject multiplier;
+
+    public float timerMin = 30f;
+    public float timerMax = 45f;
+    // Start is called before the first frame update
+    void Start()
+    {
+        timer = 0;
+        maxTimer = Random.Range(30f, 45f);
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        StartCoroutine("SpawnMultiplierTimer");
+    }
+
+    void SpawnMultiplier()
+    {
+        float y = 1.25f;
+        Vector3 spawnPoint = Camera.main.ViewportToWorldPoint(new Vector3(Random.Range(0, 1f), y, 0));
+        spawnPoint.z = 0;
+        GameObject.Instantiate(multiplier, spawnPoint, new Quaternion(0, 0, 0, 0));
+
+        //Adjust x-axis position
+        float dist = (this.transform.position - Camera.main.transform.position).z;
+        float leftBorder = Camera.main.ViewportToWorldPoint(new Vector3(0, 0, dist)).x;
+        float rightBorder = Camera.main.ViewportToWorldPoint(new Vector3(1, 0, dist)).x;
+        Vector3 multiplierSize = multiplier.GetComponent<Renderer>().bounds.size;
+        spawnPoint.x = Mathf.Clamp(spawnPoint.x, leftBorder + multiplierSize.x / 2, rightBorder - multiplierSize.x / 2);
+    }
+
+    IEnumerator SpawnMultiplierTimer()
+    {
+        if (timer >= maxTimer)
+        {
+            SpawnMultiplier();
+            timer = 0;
+            maxTimer = Random.Range(timerMin, timerMax);
+        }
+
+        timer += 0.05f;
+        yield return new WaitForSeconds(0.05f);
+    }
+}
